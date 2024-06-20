@@ -1,0 +1,285 @@
+{% extends "base.html" %} {% block content %}{% load cart_template_tags %}
+    <!-- Bootstrap CSS -->
+
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+<style>
+  .last{
+    margin-left:285px;
+  }
+  body{
+    background-color: rgba(0, 0, 0, 0.56);
+  }
+  .container {
+    max-width: 1250px;
+    position:absolute;
+    padding: 0 15px; /* Add some padding to prevent content from touching the edges */
+  }
+  .logout-btn-container {
+    width: 95%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto; /* Set height to auto to match button size to text size */
+    border:1px solid black;
+    border-radius: 10px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px; /* Adjust padding as needed */
+    /*background-color: #007bff;  Example background color */
+    color: #ffffffe5; /* Example text color */
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0065b385; /* Example hover background color */
+}
+
+.btn strong {
+    display: block; /* Ensure the strong element takes up the full width of the button */
+}
+
+</style>
+  </head>
+  <body>
+    <div class="container">
+    <h5 style="font-style: italic; margin-left:60px;">My Account</h5>
+    <section style="padding:10px">
+        <div class="card" >
+          <div class="row g-0">
+            <div class="col-md-3">
+              <img  src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+              class="rounded-circle img-fluid" style="width: 150px; height:100% ;margin-left:100px; background-color: rgba(0, 0, 0, 0.353);">
+            </div>
+            <div class="col-md-3">
+              <div class="card-body">
+                <h5 class="card-title">{{ request.user }}</h5>
+                <p class="card-text md-6"><strong>{{ request.user.email }}</strong></p>
+                <p class="card-text"><strong>965XXXXXXX</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <Collapse>
+          <div id="accordion" style="margin:20px  ;border-radius:10px">
+            <div class="card">
+              <div class="card-header" id="headingOne"
+              class="collapse"
+                    data-toggle="collapse"
+                    data-target="#collapseOne"
+                    aria-expanded="true"
+                    aria-controls="collapseOne">
+                    <strong>Orders</strong>
+                    <span class="material-symbols-outlined" style="vertical-align: middle;">
+                      keyboard_arrow_down
+                      </span>
+              </div>
+
+              <div
+                id="collapseOne"
+                class="collapse"
+                aria-labelledby="headingOne"
+                data-parent="#accordion"
+              >
+                <div class="card-body">
+                  {% for order in items %}
+                  <div class="card-body" style=" background-color:rgba(127, 255, 212, 0.185); margin:1px">
+                    
+                  {% for order_item in order.items.all %}
+                      <div class="row wow fadeIn">
+                        <div class="col-md-3 " style="margin-bottom:20px">
+                          <img style="width: 200px; height:120px; object-fit: cover;" src="{{ order_item.item.image.url }}" class="img-fluid" alt="" />
+                          <a href="{{ order_item.item.get_absolute_url }}">
+                            <div class="mask rgba-white-slight"></div>
+                          </a>
+                        </div>
+                        <div  class="col-md-4">
+                          
+                            <h6><strong>{{ order_item.item.title }}</strong></h6>
+                            {% if order_item.item.discount_price %}
+                            <p><strong>Amount : ${{ order_item.item.discount_price }} x {{ order_item.quantity }}</strong></p>
+                            {% else %}
+                            <p><strong>Amount : ${{ order_item.item.price }} x {{ order_item.quantity }}</strong></p>
+                            {% endif %}
+                            <p><strong>Size: {{ order_item.item.size }}</strong> </p>
+                          
+                      </div>
+                </div>
+                {% endfor %}
+              <div class="last">
+              <div class="payment">
+              {% if order.coupon_amount %}
+              <strong>Saved: -${{ order.coupon_amount }}</strong>
+                </div>
+              {% endif %}
+              <div class="payment">
+                <strong> Paid : ${{order.payment.amount}}</strong>
+            </div>
+            <div >
+              <strong>Ordered_date= {{ order.ordered_date }}</strong>
+              </div>
+            <div class="payment">
+              <strong>
+                Street_Address: {{ order.shipping_address.street_address }}    Apartment_Address: {{ order.shipping_address.apartment_address }} 
+              </strong>
+            </div>
+            <div class="payment">
+            <strong>Payment_id : {{order.payment.stripe_charge_id}}</strong>
+          </div>
+        </div>
+        </div>
+      </div>
+          {% endfor %}
+          {% if not items %}
+              <h5>No Items Ordered.</h5>
+          {% endif %}
+       
+    </div>
+    </div>
+            <div class="card">
+              <div class="card-header" id="headingTwo"
+              data-toggle="collapse"
+                    data-target="#collapseTwo"
+                    aria-expanded="false"
+                    aria-controls="collapseTwo">
+                    <strong>Address</strong>
+                    <span class="material-symbols-outlined" style="vertical-align: middle;">
+                      keyboard_arrow_down
+                      </span>
+              </div>
+              <div
+                id="collapseTwo"
+                class="collapse"
+                aria-labelledby="headingTwo"
+                data-parent="#accordion"
+              >
+            {% for add in address %}
+              <div class="card" style="margin-left:10px" >
+                <div class="card-body">
+                  {% if add.default %}
+                  <div class="badge text-bg-success text-wrap" style="width: 54px; height:18px;">
+                    Default
+                  </div>
+                  {% endif %}
+                  <h5 class="card-title">{{ add.address_type }}</h5>
+                  <h6 class="card-subtitle  text-body-secondary">Street Address:{{ add.street_address }}</h6>
+                  <h6 class="card-subtitle  text-body-secondary">Home Address:{{ add.apartment_address }}</h6>
+                  <i>{{ add.country.name }} - {{ add.zip }}</i>
+                  <i>Phone : xxxxxxxxxx</i>
+                  <form action="{% url 'core:delete_address' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="address_id" value="{{ add.pk }}">
+                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                  </form>
+                </div>
+              </div>
+              {% endfor %}
+              </div>
+            </div>
+          
+            <div class="card">
+              <div class="card-header" id="headingThree"
+              data-toggle="collapse"
+                    data-target="#collapseThree"
+                    aria-expanded="false"
+                    aria-controls="collapseThree">
+                  <strong>How do i Redeem My Coupon ?</strong>
+                  <span class="material-symbols-outlined" style="vertical-align: middle;">
+                    keyboard_arrow_down
+                    </span>
+              </div>
+              <div
+                id="collapseThree"
+                class="collapse"
+                aria-labelledby="headingThree"
+                data-parent="#accordion"
+              >
+                <div class="card-body">
+                  Its a simple as snow! add the products to your 'Bag'.
+                  Go to Cart and Click the Proceed Button .Then you add the Address to Checkout Page there you can see the Add Redeem Coupon Add Coupon Code then Click Go to Payment.
+                  
+                </div>
+              </div>
+            </div>
+                <div class="card">
+                  <div class="card-header" id="headingFour"
+                  data-toggle="collapse"
+                        data-target="#collapseFour"
+                        aria-expanded="false"
+                        aria-controls="collapseFour">
+                      <strong>Terms & Conditions</strong>
+                      <span class="material-symbols-outlined" style="vertical-align: middle;">
+                        keyboard_arrow_down
+                        </span>
+                </div>
+                  <div
+                    id="collapseFour"
+                    class="collapse"
+                    aria-labelledby="headingFour"
+                    data-parent="#accordion"
+                  >
+                    <div class="card-body">
+                      <h5>Terms and Conditions</h5>
+                  <p>
+                    Welcome to [Your eCommerce Store]! These terms and conditions outline the rules and regulations for the use of [Your Company Name]'s Website, located at [Website URL].
+                  </p>
+                  <h6>1. Introduction</h6>
+                  <p>
+                    By accessing this website we assume you accept these terms and conditions. Do not continue to use [Your eCommerce Store] if you do not agree to take all of the terms and conditions stated on this page.
+                  </p>
+                  <h6>2. Intellectual Property Rights</h6>
+                  <p>
+                    Other than the content you own, under these terms, [Your Company Name] and/or its licensors own all the intellectual property rights and materials contained in this Website.
+                  </p>
+                  <h6>3. Restrictions</h6>
+                  <p>
+                    You are specifically restricted from all of the following:
+                    <ul>
+                      <li>publishing any Website material in any other media;</li>
+                      <li>selling, sublicensing, and/or otherwise commercializing any Website material;</li>
+                      <li>publicly performing and/or showing any Website material;</li>
+                      <li>using this Website in any way that is or may be damaging to this Website;</li>
+                      <li>using this Website in any way that impacts user access to this Website;</li>
+                      <li>using this Website contrary to applicable laws and regulations, or in any way may cause harm to the Website, or to any person or business entity;</li>
+                      <li>engaging in any data mining, data harvesting, data extracting or any other similar activity in relation to this Website;</li>
+                      <li>using this Website to engage in any advertising or marketing.</li>
+                    </ul>
+                  </p>
+              </div>
+            </div>
+            </div>
+          </div>
+
+        </Collapse>
+        <div class="logout-btn-container mt-2 mb-2" style="background-color: aliceblue;">
+          <a class="btn" href="{% url 'account_logout' %}">
+              <strong style="color:black">Logout</strong> 
+          </a>
+      </div> 
+      </div>
+      </body>
+      
+{% endblock content %}

@@ -1,0 +1,277 @@
+{% extends "base.html" %} {% block content %}{% load cart_template_tags %}
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+<style>
+  /* Assuming the section has a container class */
+.grid{
+      display:grid;
+      color: rgba(42, 9, 61, 0.878);
+      background-color: #1434516f;
+      grid-template-columns:0.5fr 1fr;
+      /*grid-gap:20px;*/
+    }
+
+.rightblock{
+  display: grid;
+  margin-left:15px;
+  grid-template-columns:1fr 1fr  1fr;
+  justify-content: space-evenly;
+}
+
+  .card {
+  width: 220px; /* Set the desired width for the card */
+  height: 280px; /* Set the desired height for the card */
+  overflow: hidden; 
+  padding:4px;
+  margin-bottom: 10px;
+  border-radius:10px;
+  
+  /* Hide any overflow if image is larger than the card */
+}
+
+.card .view.overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  
+}
+
+.card .view.overlay img {
+  margin-left: 6px;
+  width: 200px; /* Ensure the image fills the card horizontally */
+  height: 232px; /* Ensure the image fills the card vertically */
+  object-fit: cover;
+  border-radius:10px;
+   /* Scale the image to maintain aspect ratio while filling the container */
+}
+
+</style>
+<style>
+  /****** Bootstrap Colors ******/
+.primary {
+  min-height: 800px;
+  margin:15px;
+  width: 350px;
+}
+/*** Accordion Toggles ***/
+.panel-heading {
+  position: relative;
+}
+.panel-heading .accordion-toggle:after {
+  font-family: 'Glyphicons Halflings';
+  content: "\e260";
+  position: absolute;
+  /*right: 16px;*/
+}
+.panel-heading .accordion-toggle.collapsed:after {
+  font-family: 'Glyphicons Halflings';
+  content: "\e259";
+}
+/*** Filter Menu ***/
+/* Panels */
+.filter-menu .panel {
+  border-radius: 0;
+  border: 1px solid #eeeeee;
+}
+.filter-menu .panel-heading {
+  background: rgba(0, 0, 0, 0.419);
+  padding: 0;
+}
+.filter-menu .panel-title {
+  color: #333333;
+  font-weight: bold;
+  display: block;
+  padding: 16px;
+}
+.filter-menu a.panel-title {
+  color: white;
+}
+.filter-menu a.panel-title:hover,
+.filter-menu a.panel-title:focus {
+  color:white;
+  text-decoration: none;
+}
+.filter-menu .panel-body {
+  padding: 16px;
+  background:rgba(255, 255, 255, 0.953);
+}
+/* Inner Panels */
+.filter-menu .panel-group {
+  margin: -16px;
+}
+.filter-menu .panel-group .panel-title {
+  background: rgba(0, 0, 0, 0.358);
+  transition: color, 0.5s, ease;
+}
+.filter-menu .panel-group .panel-title:hover {
+  color: #333333;
+  text-decoration: none;
+  /*background: #777777;*/
+}
+.filter-menu .panel-group .panel + .panel {
+  margin-top: 0;
+}
+/*** Filter Menu - Mobile ***/
+/* Panels - Mobile */
+.filter-menu.mobile .btn-link {
+  color: #f9f9f9;
+}
+.filter-menu.mobile hr {
+  margin-top: 0;
+  border-top-color: #4B6473;
+}
+.filter-menu.mobile .panel-group .panel-heading + .panel-collapse > .panel-body {
+  border-color: #4B6473;
+}
+.filter-menu.mobile .panel {
+  border-color: #4B6473;
+  /*background: #30404a;*/
+  color: #f9f9f9;
+}
+.filter-menu.mobile .panel-heading {
+  background: #30404a;
+}
+.filter-menu.mobile a.panel-title {
+  color:aqua
+}
+.filter-menu.mobile a.panel-title:hover {
+  background: black;
+}
+.filter-menu.mobile .panel-group .panel {
+  border-color: #4B6473;
+}
+.filter-menu.mobile .panel-group .panel-title {
+  background: #3f5460;
+}
+.filter-menu.mobile .panel-group .panel-title:hover {
+  color: #f9f9f9;
+  background: #30404a;
+}
+</style>
+<script>
+  document.getElementById("resetBtn").addEventListener("click", function() {
+      document.getElementById("filterForm").action = "{% url 'core:detail' %}";
+      document.getElementById("filterForm").submit();
+  });
+</script>
+<div class="grid">
+  <!-- filter-->
+  <div class="primary">
+        <!--<div class="col-xs-6">-->
+          <div class="filter-menu">
+            <form id="filterForm" method="POST" action="{% url 'core:apply_filters' %}">
+              {% csrf_token %}
+              {% if items %}
+              <input type="hidden"  name="category" value="{{ items.0.category }}">
+              {% endif %}
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <div class="panel-title hidden-sm">
+                    Filter
+                  </div><!-- /.panel-title -->
+                  <div class="panel-body">
+                    <button id="applyFilterBtn" class="btn btn-default" type="submit">Apply Filters</button>
+                    <button id="resetBtn" class="btn btn-sm btn-link pull-right hidden-sm" type="button">Reset</button>
+                    <a class="btn btn-sm btn-link pull-right visible-sm-inline" href="#">Clear Selections</a>
+                    <div>
+                    </div>
+                  </div><!-- /.panel-body -->
+                </div><!-- /.panel-heading -->
+
+                <div class="panel-body">
+                  <div class="panel-group" id="filter-menu" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                      <div class="panel-heading" role="tab" id="headingOne">
+                        <a class="panel-title accordion-toggle" role="button" data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                          Gender
+                        </a><!-- /.panel-title -->
+                      </div><!-- /.panel-heading -->
+                      <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                          <div class="checkbox"><label><input type="radio" name="gender_state" value="boys"> Boys</label></div>
+                          <div class="checkbox"><label><input type="radio" name="gender_state" value="men"> Men</label></div>
+                        </div><!-- /.panel-bodof htmly -->
+                      </div><!-- /.panel-collapse -->
+                    </div><!-- /.panel -->
+
+                    <div class="panel panel-default">
+                      <div class="panel-heading" role="tab" id="headingThree">
+                        <a class="panel-title accordion-toggle collapsed" role="button" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                          Size
+                        </a><!-- /.panel-title -->
+                      </div><!-- /.panel-heading -->
+                      <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                        <div class="panel-body">
+                          <div class="checkbox"><label><input type="checkbox" name="size[]" value="S">S(28)</label></div>
+                          <div class="checkbox"><label><input type="checkbox" name="size[]" value="M">M(30)</label></div>
+                          <div class="checkbox"><label><input type="checkbox" name="size[]" value="L">L(40)</label></div>
+                          <div class="checkbox"><label><input type="checkbox" name="size[]" value="XL">XL(42)</label></div>
+                          <div class="checkbox"><label><input type="checkbox" name="size[]" value="XXL">XXL(44)</label></div>
+                        </div><!-- /.panel-body -->
+                      </div><!-- /.panel-collapse -->
+                    </div><!-- /.panel -->
+
+                    <div class="panel panel-default">
+                      <div class="panel-heading" role="tab" id="headingFour">
+                        <a class="panel-title accordion-toggle collapsed" role="button" data-toggle="collapse" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                          Price
+                        </a><!-- /.panel-title -->
+                      </div><!-- /.panel-heading -->
+                      <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+                        <div class="panel-body">
+                          <div class="checkbox"><label><input type="radio" name="price" value="LowtoHigh">Low to High</label></div>
+                          <div class="checkbox"><label><input type="radio" name="price" value="HightoLow">High to Low</label></div>
+                        </div><!-- /.panel-body -->
+                      </div><!-- /.panel-collapse -->
+                    </div><!-- /.panel -->
+                  </div><!-- /.panel-group -->
+                </div><!-- /.panel-body -->
+
+              </div><!-- /.panel -->
+            </form>
+          </div><!-- /.filter-menu -->
+        </div>
+
+          <div class="rightblock mt-4">
+          {% for item in items %}
+          <!--<li>{{ item.title }} - ${{ item.price }}</li>-->
+          
+            <div class="card style=" width: 18rem;">
+              <div class="view overlay">
+                  <img
+                  src="{{ item.image.url }}"
+                  class="card-img-top"
+                />
+                <a href="{{ item.get_absolute_url }}">
+                  <div class="mask rgba-white-slight"></div>
+                </a>
+              </div>
+  
+              <div class="card-body text-center mt-0">
+                <h5>
+                  <strong>
+                    <a href="{{ item.get_absolute_url }}" class="dark-grey-text"
+                      >{{ item.title }}
+                      
+                    </a>
+                  </strong>
+                </h5>
+              </div>
+            </div>
+          
+          {% endfor %}
+        </div>
+        </div>
+      </section>
+      </div>
+  </div>
+</div>
+<script>
+  document.getElementById("resetBtn").addEventListener("click", function() {
+      document.getElementById("filterForm").action = "{% url 'core:detail' %}";
+      document.getElementById("filterForm").submit();
+  });
+</script>
+  {% endblock content %}
